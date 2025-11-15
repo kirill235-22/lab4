@@ -125,6 +125,107 @@ abstract class Piece {
     }
 }
 
+//Класс Пешка
+class Pawn extends Piece {
+    private static final List<Coordinates> FIRST_PATTERN = Arrays.asList(
+            new Coordinates(0, 1), new Coordinates(0, 2),
+            new Coordinates(-1, 1), new Coordinates(1, 1)
+    ); //шаблон первого хода
+
+    private static final List<Coordinates> PATTERN = Arrays.asList(
+            new Coordinates(0, 1),
+            new Coordinates(-1, 1), new Coordinates(1, 1)
+    ); //шаблон хода, кроме первого
+
+    public Pawn() { super(PieceType.PAWN); }
+    public Pawn(Coordinates pos, Color col) { super(pos, col, PieceType.PAWN); }
+
+    //получение шаблона передвижения
+    @Override
+    public List<Coordinates> getPattern() {
+        return isMoved() ? new ArrayList<>(PATTERN) : new ArrayList<>(FIRST_PATTERN);
+    }
+}
+
+//Класс Слон
+class Bishop extends Piece {
+    private static final List<Coordinates> PATTERN = Arrays.asList(
+            new Coordinates(-1,1), new Coordinates(1,1),
+            new Coordinates(-1,-1), new Coordinates(1,-1)
+    ); //шаблон хода
+
+    public Bishop() { super(PieceType.BISHOP); }
+    public Bishop(Coordinates pos, Color col) { super(pos, col, PieceType.BISHOP); }
+
+    //получение шаблона хода
+    @Override
+    public List<Coordinates> getPattern() { return new ArrayList<>(PATTERN); }
+}
+
+//Класс Король
+class King extends Piece {
+    private static final List<Coordinates> PATTERN = Arrays.asList(
+            new Coordinates(-1,1), new Coordinates(0,1), new Coordinates(1,1),
+            new Coordinates(-1,0), new Coordinates(1,0),
+            new Coordinates(-1,-1), new Coordinates(0,-1), new Coordinates(1,-1)
+    ); //шаблон хода
+
+    public King() { super(PieceType.KING); }
+    public King(Coordinates pos, Color col) { super(pos, col, PieceType.KING); }
+
+    //получение шаблона передвижения
+    @Override
+    public List<Coordinates> getPattern() { return new ArrayList<>(PATTERN); }
+}
+
+//Класс Конь
+class Knight extends Piece {
+    private static final List<Coordinates> PATTERN = Arrays.asList(
+            new Coordinates(-1,2), new Coordinates(1,2),
+            new Coordinates(2,1), new Coordinates(2,-1),
+            new Coordinates(1,-2), new Coordinates(-1,-2),
+            new Coordinates(-2,-1), new Coordinates(-2,1)
+    ); //шаблон передвижения
+
+    public Knight() { super(PieceType.KNIGHT); }
+    public Knight(Coordinates pos, Color col) { super(pos, col, PieceType.KNIGHT); }
+
+    //получение шаблона передвижения
+    @Override
+    public List<Coordinates> getPattern() { return new ArrayList<>(PATTERN); }
+}
+
+//Класс Ферзь
+class Queen extends Piece {
+    private static final List<Coordinates> PATTERN = Arrays.asList(
+            new Coordinates(-1,1), new Coordinates(0,1), new Coordinates(1,1),
+            new Coordinates(-1,0), new Coordinates(1,0),
+            new Coordinates(-1,-1), new Coordinates(0,-1), new Coordinates(1,-1)
+    ); //шаблон хода фигуры
+
+    public Queen() { super(PieceType.QUEEN); }
+    public Queen(Coordinates pos, Color col) { super(pos, col, PieceType.QUEEN); }
+
+    //получение шаблона передвижения
+    @Override
+    public List<Coordinates> getPattern() { return new ArrayList<>(PATTERN); }
+}
+
+//Класс Ладья
+class Rook extends Piece {
+    private static final List<Coordinates> PATTERN = Arrays.asList(
+            new Coordinates(0,1), new Coordinates(1,0),
+            new Coordinates(-1,0), new Coordinates(0,-1)
+    ); //шаблон хода фигуры
+
+    public Rook() { super(PieceType.ROOK); }
+    public Rook(Coordinates pos, Color col) { super(pos, col, PieceType.ROOK); }
+
+    //получение шаблона передвижения
+    @Override
+    public List<Coordinates> getPattern() { return new ArrayList<>(PATTERN); }
+}
+
 public class lab4 {
     
 }
