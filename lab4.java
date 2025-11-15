@@ -600,6 +600,126 @@ class Player {
     }
 }
 
+//Класс Игра
+class Game {
+    private Player whitePlayer; //игрок 1
+    private Player blackPlayer; //игрок 2
+    private Board board; //доска
+    private Timer timer; //таймер
+
+    public Game(Scanner scanner) {
+        System.out.print("Введите имя 1 игрока: ");
+        whitePlayer = new Player(scanner.nextLine().trim());
+        System.out.print("Введите имя 2 игрока: ");
+        blackPlayer = new Player(scanner.nextLine().trim());
+        board = new Board();
+    }
+
+    //вывод результатов игры
+    public void printResults(int state) {
+        if (state == -1) {
+            System.out.println("Ничья!");
+        } else if (state == 1) {
+            System.out.println("Белые победили!");
+            whitePlayer.incWonGames();
+            blackPlayer.incLostGames();
+        } else if (state == 2) {
+            System.out.println("Черные победили!");
+            blackPlayer.incWonGames();
+            whitePlayer.incLostGames();
+        }
+        System.out.println();
+        whitePlayer.printStats();
+        System.out.println();
+        blackPlayer.printStats();
+        System.out.println();
+        timer.printTime();
+    }
+
+    //вывод текущего цвета
+    public void printActive() {
+        Color active = board.getActive();
+        if (active == Color.WHITE) {
+            System.out.println("white: " + whitePlayer.getName());
+        } else {
+            System.out.println("black: " + blackPlayer.getName());
+        }
+    }
+
+    //перевод буквенных координат в стуктуру
+    private Coordinates convert(String str) {
+        if (str.length() != 2) return new Coordinates(8, 8);
+        char file = Character.toUpperCase(str.charAt(0));
+        char rank = str.charAt(1);
+        if (file < 'A' || file > 'H' || rank < '1' || rank > '8')
+            return new Coordinates(-1, -1);
+        int x = file - 'A';
+        int y = rank - '1';
+        return new Coordinates(x, y);
+    }
+
+    //запуск игры
+    public void play(Scanner scanner) {
+        timer = new Timer();
+        int state = 0;
+        boolean prevWrong = false;
+
+        while (state == 0) {
+            System.out.print("\033[H\033[2J");
+            System.out.flush();
+
+            printActive();
+            board.drawBoard();
+            if (prevWrong) {
+                System.out.println("Ошибка");
+                prevWrong = false;
+            }
+
+            String s1 = scanner.nextLine().trim();
+            if (s1.equals("exit")) {
+                state = -1;
+                continue;
+            }
+
+            Coordinates c1 = convert(s1);
+            if (!c1.checkBound()) {
+                prevWrong = true;
+                continue;
+            }
+
+            if (!board.sqHasPiece(c1) || !board.checkOwner(c1)) {
+                prevWrong = true;
+                continue;
+            }
+
+            boolean hasMoves = board.drawMoves(c1);
+            if (!hasMoves) {
+                prevWrong = true;
+                continue;
+            }
+
+            String s2 = scanner.nextLine().trim();
+            Coordinates c2 = convert(s2);
+            if (!c2.checkBound()) {
+                prevWrong = true;
+                continue;
+            }
+
+            state = board.movePiece(c1, c2);
+        }
+
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+        timer.stopTimer();
+        printResults(state);
+    }
+}
+
 public class lab4 {
-    
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Game game = new Game(scanner);
+        game.play(scanner);
+        scanner.close();
+    }
 }
