@@ -382,6 +382,150 @@ class Square {
     }
 }
 
+//Класс Доска
+class Board {
+    private Color activeColor = Color.WHITE; //текущий цвет
+    private static final PieceType[][] SCHEME = {
+            {PieceType.ROOK, PieceType.KNIGHT, PieceType.BISHOP, PieceType.QUEEN, PieceType.KING, PieceType.BISHOP, PieceType.KNIGHT, PieceType.ROOK},
+            {PieceType.PAWN, PieceType.PAWN, PieceType.PAWN, PieceType.PAWN, PieceType.PAWN, PieceType.PAWN, PieceType.PAWN, PieceType.PAWN},
+            {PieceType.PAWN, PieceType.PAWN, PieceType.PAWN, PieceType.PAWN, PieceType.PAWN, PieceType.PAWN, PieceType.PAWN, PieceType.PAWN},
+            {PieceType.ROOK, PieceType.KNIGHT, PieceType.BISHOP, PieceType.KING, PieceType.QUEEN, PieceType.BISHOP, PieceType.KNIGHT, PieceType.ROOK}
+    }; //шаблон заполнения доски
+
+    private Square[][] board = new Square[8][8]; //доска
+
+    public Board() {
+        initBoard();
+    }
+
+    //инициализация доски
+    private void initBoard() {
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                if (y <= 1) {
+                    board[x][y] = new Square(new Coordinates(x, y), SCHEME[y][x], Color.WHITE);
+                } else if (y >= 6) {
+                    board[x][y] = new Square(new Coordinates(x, y), SCHEME[y - 4][x], Color.BLACK);
+                } else {
+                    board[x][y] = new Square(new Coordinates(x, y));
+                }
+            }
+        }
+    }
+
+    //вывод доски
+    public void drawBoard() {
+        for (int y = 7; y >= 0; y--) {
+            System.out.print((y + 1));
+            for (int x = 0; x < 8; x++) {
+                Square sq = board[x][y];
+                if (sq.hasPiece()) {
+                    Piece p = sq.getPiece();
+                    String symbol = switch (p.getType()) {
+                        case PAWN -> p.getColor() == Color.WHITE ? "\u2659" : "\u265F";
+                        case ROOK -> p.getColor() == Color.WHITE ? "\u2656" : "\u265C";
+                        case KNIGHT -> p.getColor() == Color.WHITE ? "\u2658" : "\u265E";
+                        case BISHOP -> p.getColor() == Color.WHITE ? "\u2657" : "\u265D";
+                        case KING -> p.getColor() == Color.WHITE ? "\u2654" : "\u265A";
+                        case QUEEN -> p.getColor() == Color.WHITE ? "\u2655" : "\u265B";
+                    };
+                    System.out.print("|" + symbol + " ");
+                } else {
+                    System.out.print("|  ");
+                }
+            }
+            System.out.println("|");
+        }
+        System.out.println("  A  B  C  D  E  F  G  H");
+    }
+
+    //отображение ходов фигуры
+    public boolean drawMoves(Coordinates pos) {
+        List<Coordinates> moves = getMoves(pos);
+        if (moves.isEmpty()) return false;
+
+        for (int y = 7; y >= 0; y--) {
+            System.out.print((y + 1));
+            for (int x = 0; x < 8; x++) {
+                boolean found = false;
+                for (Coordinates m : moves) {
+                    if (m.equals(new Coordinates(x, y))) {
+                        System.out.print("| *");
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) System.out.print("|  ");
+            }
+            System.out.println("|");
+        }
+        System.out.println("  A  B  C  D  E  F  G  H");
+        getSquare(pos).printInfo();
+        return true;
+    }
+
+    //получение ходов фигуры по координатам
+    public List<Coordinates> getMoves(Coordinates pos) {
+        return getSquare(pos).getMoves(board, activeColor);
+    }
+
+    //получение клетки по координатам
+    public Square getSquare(Coordinates pos) {
+        return board[pos.getX()][pos.getY()];
+    }
+
+    //проверка наличия фигуры на клетке
+    public boolean sqHasPiece(Coordinates pos) {
+        return getSquare(pos).hasPiece();
+    }
+
+    //получение фигуры на клетке
+    public Piece getSqPiece(Coordinates pos) {
+        return getSquare(pos).getPiece();
+    }
+
+    //смена текущего цвета
+    public void changeActive() {
+        activeColor = (activeColor == Color.WHITE) ? Color.BLACK : Color.WHITE;
+    }
+
+    //получение текущего цвета
+    public Color getActive() {
+        return activeColor;
+    }
+
+    //проверить возможность сдвинуть выбранную фигуру
+    public boolean checkOwner(Coordinates pos) {
+        return getSqPiece(pos).getColor() == getActive();
+    }
+
+    //передвижение фигуры
+    public int movePiece(Coordinates c1, Coordinates c2) {
+        int state = 0;
+        if (!sqHasPiece(c1)) {
+            System.out.println("Поле пустое");
+            return state;
+        }
+
+        List<Coordinates> moves = getMoves(c1);
+        boolean found = moves.stream().anyMatch(m -> m.equals(c2));
+
+        if (found) {
+            if (sqHasPiece(c2) && getSqPiece(c2).getType() == PieceType.KING) {
+                state = (getActive() == Color.WHITE) ? 1 : 2;
+            }
+            getSqPiece(c1).incMoves();
+            getSquare(c2).setPiece(getSqPiece(c1));
+            getSquare(c1).removePiece();
+            changeActive();
+        } else {
+            System.out.println("Фигура не может сюда пойти");
+        }
+        return state;
+    }
+}
+
+
 public class lab4 {
     
 }
