@@ -226,6 +226,162 @@ class Rook extends Piece {
     public List<Coordinates> getPattern() { return new ArrayList<>(PATTERN); }
 }
 
+//Класс Клетка
+class Square {
+    private Piece piece; //фигура на клетке
+    private Coordinates pos; //координаты клетки
+
+    public Square(Coordinates pos) {
+        this.pos = pos;
+        this.piece = null;
+    }
+
+    public Square(Coordinates pos, PieceType type, Color col) {
+        this.pos = pos;
+        setPiece(createPiece(pos, type, col));
+    }
+
+    //создание фигуры
+    private Piece createPiece(Coordinates pos, PieceType type, Color col) {
+        return switch (type) {
+            case BISHOP -> new Bishop(pos, col);
+            case KING -> new King(pos, col);
+            case KNIGHT -> new Knight(pos, col);
+            case PAWN -> new Pawn(pos, col);
+            case QUEEN -> new Queen(pos, col);
+            case ROOK -> new Rook(pos, col);
+        };
+    }
+
+    //получение координат фигуры
+    public Coordinates getPos() { return pos; }
+
+    //поменять фигуру
+    public void setPiece(Piece piece) {
+        if (this.piece != null) this.piece.setDead();
+        this.piece = piece;
+        if (piece != null) piece.setPos(pos);
+    }
+
+    //получить фигуру на клетке
+    public Piece getPiece() { return piece; }
+
+    //убрать фигуру
+    public void removePiece() { piece = null; }
+
+    //проверить наличие фигуры
+    public boolean hasPiece() { return piece != null; }
+
+    //получить цвет фигуры
+    public Color getPieceColor() { return piece.getColor(); }
+
+    //получить тип фигуры
+    public PieceType getPieceType() { return piece.getType(); }
+
+    //получить шаблон хода фигуры
+    public List<Coordinates> getPiecePattern() { return piece.getPattern(); }
+
+    //получить доступные для фигуры на клетке ходы
+    public List<Coordinates> getMoves(Square[][] board, Color active) {
+        return switch (getPieceType()) {
+            case BISHOP, ROOK, QUEEN -> getContMoves(board, active);
+            case KING, KNIGHT -> getShortMoves(board, active);
+            case PAWN -> getPawnMoves(board, active);
+        };
+    }
+
+    //получить продолжительные ходы
+    private List<Coordinates> getContMoves(Square[][] board, Color active) {
+        List<Coordinates> moves = new ArrayList<>();
+        List<Coordinates> pattern = getPiecePattern();
+        Coordinates pos = getPos();
+
+        for (Coordinates move : pattern) {
+            int n = 1;
+            boolean stop = false;
+            while (!stop) {
+                Coordinates tpos = pos.add(move.multiply(n));
+                if (tpos.checkBound()) {
+                    Square target = board[tpos.getX()][tpos.getY()];
+                    if (!target.hasPiece()) {
+                        moves.add(tpos);
+                        n++;
+                    } else if (target.getPieceColor() != active) {
+                        moves.add(tpos);
+                        stop = true;
+                    } else {
+                        stop = true;
+                    }
+                } else {
+                    stop = true;
+                }
+            }
+        }
+        return moves;
+    }
+
+    //получить короткие ходы
+    private List<Coordinates> getShortMoves(Square[][] board, Color active) {
+        List<Coordinates> moves = new ArrayList<>();
+        List<Coordinates> pattern = getPiecePattern();
+        Coordinates pos = getPos();
+
+        for (Coordinates move : pattern) {
+            Coordinates tpos = pos.add(move);
+            if (tpos.checkBound()) {
+                Square target = board[tpos.getX()][tpos.getY()];
+                if (!target.hasPiece() || target.getPieceColor() != active) {
+                    moves.add(tpos);
+                }
+            }
+        }
+        return moves;
+    }
+
+    //получить ходы пешки
+    private List<Coordinates> getPawnMoves(Square[][] board, Color active) {
+        List<Coordinates> moves = new ArrayList<>();
+        List<Coordinates> pattern = getPiecePattern();
+        Coordinates pos = getPos();
+
+        for (Coordinates move : pattern) {
+            Coordinates tpos, forward;
+            if (getPieceColor() == Color.WHITE) {
+                tpos = pos.add(move);
+                forward = pos.add(new Coordinates(0, 1));
+            } else {
+                tpos = pos.subtract(move);
+                forward = pos.subtract(new Coordinates(0, 1));
+            }
+
+            if (tpos.checkBound()) {
+                if (move.getX() == 0) {
+                    if (!board[forward.getX()][forward.getY()].hasPiece()) {
+                        moves.add(tpos);
+                    }
+                } else {
+                    Square target = board[tpos.getX()][tpos.getY()];
+                    if (target.hasPiece() && target.getPieceColor() != active) {
+                        moves.add(tpos);
+                    }
+                }
+            }
+        }
+        return moves;
+    }
+
+    //вывод информации о клетке и фигуре, стоящей на ней
+    public void printInfo() {
+        System.out.println("Клетка " + toString(pos));
+        getPiece().printInfo();
+    }
+
+    //вывод координат
+    private String toString(Coordinates coor) {
+        return "" + (char)(coor.getX() + 'A') + (coor.getY() + 1);
+    }
+}
+
 public class lab4 {
     
 }
