@@ -1,4 +1,5 @@
 import java.util.*;
+import java.time.*;
 
 //типы фигур
 enum PieceType {
@@ -525,6 +526,79 @@ class Board {
     }
 }
 
+//Класс Таймер
+class Timer {
+    private Instant startTime; //время начала игры
+    private Duration duration; //длительность игры
+
+    public Timer() {
+        startTimer();
+    }
+
+    //запуск таймера
+    public void startTimer() {
+        startTime = Instant.now();
+    }
+
+    //остановка таймера
+    public void stopTimer() {
+        duration = Duration.between(startTime, Instant.now());
+    }
+
+    //вывод продолжительности игры
+    public void printTime() {
+        long hours = duration.toHours();
+        long minutes = duration.toMinutesPart();
+        long seconds = duration.toSecondsPart();
+        System.out.printf("Время игры: %d:%02d:%02d%n", hours, minutes, seconds);
+    }
+}
+
+//Класс Игрок
+class Player {
+    private String name; //имя
+    private int wonGames = 0; //кол-во побед
+    private int lostGames = 0; //кол-во поражений
+    private int playedGames = 0; //кол-во игр
+
+    public Player(String name) {
+        this.name = name;
+    }
+
+    //очистка статистики игрока
+    public void clearStats() {
+        wonGames = lostGames = playedGames = 0;
+    }
+
+    //установка имени игрока
+    public void setName(String name) { this.name = name; }
+
+    //получение имени игрока
+    public String getName() { return name; }
+
+    //добавление выигранной игры
+    public void incWonGames() { wonGames++; playedGames++; }
+
+    //добавление проигранной игры
+    public void incLostGames() { lostGames++; playedGames++; }
+
+    //получение количества выигранных игр
+    public int getWonGames() { return wonGames; }
+
+    //получение количества проигранных игр
+    public int getLostGames() { return lostGames; }
+
+    //получение количества игр
+    public int getPlayedGames() { return playedGames; }
+
+    //вывод статистики игрока
+    public void printStats() {
+        System.out.println("Имя: " + name);
+        System.out.println("Кол-во побед: " + wonGames);
+        System.out.println("Кол-во поражений: " + lostGames);
+        System.out.println("Всего игр: " + playedGames);
+    }
+}
 
 public class lab4 {
     
