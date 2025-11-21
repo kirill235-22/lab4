@@ -1,6 +1,13 @@
 import java.util.*;
 import java.time.*;
 
+//исключение неправильного хода
+class InvalidMoveException extends Exception {
+    public InvalidMoveException(String message) {
+        super(message);
+    }
+}
+
 //типы фигур
 enum PieceType {
     KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN
@@ -52,6 +59,19 @@ class Coordinates {
     @Override
     public int hashCode() {
         return Objects.hash(x, y);
+    }
+
+    //преобразование строки в координаты
+    public static Coordinates convert(String str) throws InvalidMoveException {
+        if (str == null || str.length() != 2) {
+            throw new InvalidMoveException("Некорректный формат: '" + str + "'. Используйте, например, 'e2'.");
+        }
+        char file = Character.toUpperCase(str.charAt(0));
+        char rank = str.charAt(1);
+        if (file < 'A' || file > 'H' || rank < '1' || rank > '8') {
+            throw new InvalidMoveException("Координаты '" + str + "' вне доски.");
+        }
+        return new Coordinates(file - 'A', rank - '1');
     }
 }
 
@@ -652,18 +672,6 @@ class Game {
         }
     }
 
-    //перевод буквенных координат в стуктуру
-    private Coordinates convert(String str) {
-        if (str.length() != 2) return new Coordinates(8, 8);
-        char file = Character.toUpperCase(str.charAt(0));
-        char rank = str.charAt(1);
-        if (file < 'A' || file > 'H' || rank < '1' || rank > '8')
-            return new Coordinates(-1, -1);
-        int x = file - 'A';
-        int y = rank - '1';
-        return new Coordinates(x, y);
-    }
-
     //запуск игры
     public void play(Scanner scanner) {
         timer = new Timer();
@@ -681,37 +689,42 @@ class Game {
                 prevWrong = false;
             }
 
-            String s1 = scanner.nextLine().trim();
-            if (s1.equals("exit")) {
-                state = -1;
-                continue;
-            }
+            try{
+                String s1 = scanner.nextLine().trim();
+                if (s1.equals("exit")) {
+                    state = -1;
+                    continue;
+                }
 
-            Coordinates c1 = convert(s1);
-            if (!c1.checkBound()) {
-                prevWrong = true;
-                continue;
-            }
+                Coordinates c1 = Coordinates.convert(s1);
+                if (!c1.checkBound()) {
+                    prevWrong = true;
+                    continue;
+                }
 
-            if (!board.sqHasPiece(c1) || !board.checkOwner(c1)) {
-                prevWrong = true;
-                continue;
-            }
+                if (!board.sqHasPiece(c1) || !board.checkOwner(c1)) {
+                    prevWrong = true;
+                    continue;
+                }
 
-            boolean hasMoves = board.drawMoves(c1);
-            if (!hasMoves) {
-                prevWrong = true;
-                continue;
-            }
+                boolean hasMoves = board.drawMoves(c1);
+                if (!hasMoves) {
+                    prevWrong = true;
+                    continue;
+                }
 
-            String s2 = scanner.nextLine().trim();
-            Coordinates c2 = convert(s2);
-            if (!c2.checkBound()) {
-                prevWrong = true;
-                continue;
-            }
+                String s2 = scanner.nextLine().trim();
+                Coordinates c2 = Coordinates.convert(s2);
+                if (!c2.checkBound()) {
+                    prevWrong = true;
+                    continue;
+                }
 
-            state = board.movePiece(c1, c2);
+                state = board.movePiece(c1, c2);
+            } catch (InvalidMoveException e) {
+                System.out.println("Ошибка: " + e.getMessage());
+                System.out.println("Попробуйте снова.");
+            }
         }
 
         System.out.print("\033[H\033[2J");
