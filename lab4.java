@@ -606,13 +606,19 @@ class Game {
     private Player blackPlayer; //игрок 2
     private Board board; //доска
     private Timer timer; //таймер
+    private static int gamesPlayed = 0; //счетчик игр
 
     public Game(Scanner scanner) {
+        gamesPlayed++;
         System.out.print("Введите имя 1 игрока: ");
         whitePlayer = new Player(scanner.nextLine().trim());
         System.out.print("Введите имя 2 игрока: ");
         blackPlayer = new Player(scanner.nextLine().trim());
         board = new Board();
+    }
+
+    public static int getPlayedGames(){
+        return gamesPlayed;
     }
 
     //вывод результатов игры
@@ -718,8 +724,15 @@ class Game {
 public class lab4 {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        Game game = new Game(scanner);
-        game.play(scanner);
+        boolean stop = false;
+        do{
+            Game game = new Game(scanner);
+            game.play(scanner);
+            System.out.println("Сыграть ещё раз? [y,n]: ");
+            String s = scanner.nextLine().trim();
+            if (s.charAt(0) == 'n') stop = true;
+        }while (!stop);
+        System.out.println("Сыграно игр: " + Game.getPlayedGames());
         scanner.close();
     }
 }
