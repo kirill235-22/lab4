@@ -736,6 +736,11 @@ class Game {
 
 public class lab4 {
     public static void main(String[] args) {
+        Piece p1 = new Pawn(new Coordinates(0,1), Color.WHITE);
+        Piece p2 = new King(new Coordinates(4,0), Color.WHITE);
+
+        System.out.println("Пешка: " + p1.getPattern().size() + " возможных направлений");
+        System.out.println("Король: " + p2.getPattern().size() + " возможных направлений");
         Scanner scanner = new Scanner(System.in);
         boolean stop = false;
         do{
