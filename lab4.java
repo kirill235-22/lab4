@@ -157,8 +157,12 @@ abstract class Piece implements Cloneable{
     }
 }
 
+interface Attackable {
+    boolean canAttack(Coordinates target);
+}
+
 //Класс Пешка
-class Pawn extends Piece {
+class Pawn extends Piece implements Attackable {
     private static final List<Coordinates> FIRST_PATTERN = Arrays.asList(
             new Coordinates(0, 1), new Coordinates(0, 2),
             new Coordinates(-1, 1), new Coordinates(1, 1)
@@ -178,6 +182,14 @@ class Pawn extends Piece {
         Pawn copy = (Pawn) super.clone();
         copy.tags = new ArrayList<>(this.tags);
         return copy;
+    }
+
+    @Override
+    public boolean canAttack(Coordinates target) {
+        Coordinates diff = target.subtract(this.pos);
+        int dx = Math.abs(diff.getX());
+        int dy = diff.getY();
+        return dx == 1 && dy == (color == Color.WHITE ? 1 : -1);
     }
 
     //получение шаблона передвижения
