@@ -76,12 +76,13 @@ class Coordinates {
 }
 
 //Абстрактный класс фигура
-abstract class Piece {
+abstract class Piece implements Cloneable{
     protected boolean isAlive = true; //состояние
     protected Color color; //цвет
     protected PieceType type; //тип
     protected Coordinates pos; //координаты
     protected int moves = 0; //кол-во ходов
+    protected List<String> tags = new ArrayList<>();
 
     public Piece(PieceType type) {
         this(new Coordinates(0, 0), Color.WHITE, type);
@@ -91,6 +92,16 @@ abstract class Piece {
         this.pos = pos;
         this.color = color;
         this.type = type;
+    }
+
+    //поверхностное клонирование
+    @Override
+    public Piece clone() {
+        try {
+            return (Piece) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     //установить координаты фигуры
@@ -146,8 +157,12 @@ abstract class Piece {
     }
 }
 
+interface Attackable {
+    boolean canAttack(Coordinates target);
+}
+
 //Класс Пешка
-class Pawn extends Piece {
+class Pawn extends Piece implements Attackable {
     private static final List<Coordinates> FIRST_PATTERN = Arrays.asList(
             new Coordinates(0, 1), new Coordinates(0, 2),
             new Coordinates(-1, 1), new Coordinates(1, 1)
@@ -160,6 +175,22 @@ class Pawn extends Piece {
 
     public Pawn() { super(PieceType.PAWN); }
     public Pawn(Coordinates pos, Color col) { super(pos, col, PieceType.PAWN); }
+
+    //глубокое клонирование
+    @Override
+    public Pawn clone() {
+        Pawn copy = (Pawn) super.clone();
+        copy.tags = new ArrayList<>(this.tags);
+        return copy;
+    }
+
+    @Override
+    public boolean canAttack(Coordinates target) {
+        Coordinates diff = target.subtract(this.pos);
+        int dx = Math.abs(diff.getX());
+        int dy = diff.getY();
+        return dx == 1 && dy == (color == Color.WHITE ? 1 : -1);
+    }
 
     //получение шаблона передвижения
     @Override
@@ -736,6 +767,11 @@ class Game {
 
 public class lab4 {
     public static void main(String[] args) {
+        Piece p1 = new Pawn(new Coordinates(0,1), Color.WHITE);
+        Piece p2 = new King(new Coordinates(4,0), Color.WHITE);
+
+        System.out.println("Пешка: " + p1.getPattern().size() + " возможных направлений");
+        System.out.println("Король: " + p2.getPattern().size() + " возможных направлений");
         Scanner scanner = new Scanner(System.in);
         boolean stop = false;
         do{
