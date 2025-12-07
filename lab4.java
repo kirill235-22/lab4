@@ -76,12 +76,13 @@ class Coordinates {
 }
 
 //Абстрактный класс фигура
-abstract class Piece {
+abstract class Piece implements Cloneable{
     protected boolean isAlive = true; //состояние
     protected Color color; //цвет
     protected PieceType type; //тип
     protected Coordinates pos; //координаты
     protected int moves = 0; //кол-во ходов
+    protected List<String> tags = new ArrayList<>();
 
     public Piece(PieceType type) {
         this(new Coordinates(0, 0), Color.WHITE, type);
@@ -91,6 +92,16 @@ abstract class Piece {
         this.pos = pos;
         this.color = color;
         this.type = type;
+    }
+
+    //поверхностное клонирование
+    @Override
+    public Piece clone() {
+        try {
+            return (Piece) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     //установить координаты фигуры
@@ -160,6 +171,14 @@ class Pawn extends Piece {
 
     public Pawn() { super(PieceType.PAWN); }
     public Pawn(Coordinates pos, Color col) { super(pos, col, PieceType.PAWN); }
+
+    //глубокое клонирование
+    @Override
+    public Pawn clone() {
+        Pawn copy = (Pawn) super.clone();
+        copy.tags = new ArrayList<>(this.tags);
+        return copy;
+    }
 
     //получение шаблона передвижения
     @Override
